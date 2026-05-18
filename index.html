@@ -1,22 +1,31 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>SVG Animation Studio</title>
+<title>SVG Animation Studio PRO</title>
 
 <link rel="stylesheet" href="style.css">
+
+<!-- GIF.js -->
+<script src="https://cdn.jsdelivr.net/npm/gif.js.optimized/dist/gif.js"></script>
+
+<!-- html2canvas -->
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+
 </head>
 
 <body>
 
 <div class="container">
 
-    <!-- LEFT PANEL -->
+    <!-- LEFT -->
     <div class="editor-panel">
 
-        <h2>CSS Animation Editor</h2>
+        <h2>Animation CSS</h2>
 
         <textarea id="cssEditor">
 .shackle{
@@ -51,33 +60,39 @@
             <select id="exportType">
 
                 <option value="svg">
-                    Export SVG
+                    SVG
                 </option>
 
                 <option value="html">
-                    Export HTML
+                    HTML
                 </option>
 
                 <option value="gif">
-                    Export GIF
+                    GIF
+                </option>
+
+                <option value="mp4">
+                    MP4
                 </option>
 
             </select>
 
             <button onclick="downloadFile()">
-                Save
+                Export
             </button>
 
         </div>
 
     </div>
 
-    <!-- RIGHT PANEL -->
+    <!-- RIGHT -->
     <div class="preview-panel">
 
         <div id="preview">
 
-            <svg id="svgCanvas" viewBox="0 0 300 320">
+            <svg
+                id="svgCanvas"
+                viewBox="0 0 300 320">
 
                 <style id="dynamicStyle"></style>
 
