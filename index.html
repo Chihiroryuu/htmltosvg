@@ -201,6 +201,52 @@
 
     .btn-exp:disabled { opacity: 0.3; cursor: not-allowed; }
 
+    /* Resolution selector */
+    .res-row {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 9px;
+    }
+
+    .res-label {
+      font-size: 0.65rem;
+      font-weight: 600;
+      color: var(--text-dim);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .res-btns {
+      display: flex;
+      gap: 5px;
+    }
+
+    .res-btn {
+      flex: 1;
+      padding: 5px 4px;
+      background: var(--navy);
+      color: rgba(255,255,255,0.45);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.62rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+      text-align: center;
+    }
+
+    .res-btn:hover { color: rgba(255,255,255,0.75); border-color: rgba(255,255,255,0.15); }
+
+    .res-btn.active {
+      background: rgba(245,166,35,0.12);
+      border-color: rgba(245,166,35,0.4);
+      color: var(--gold);
+    }
+
     .progress-wrap {
       height: 3px;
       background: rgba(255,255,255,0.06);
@@ -441,6 +487,16 @@
       <button class="btn-exp" id="exportMp4Btn">🎬 MP4</button>
     </div>
 
+    <div class="res-row">
+      <span class="res-label">Resolusi</span>
+      <div class="res-btns" id="resBtns">
+        <button class="res-btn" data-w="1280" data-h="720">HD</button>
+        <button class="res-btn active" data-w="1920" data-h="1080">FHD</button>
+        <button class="res-btn" data-w="2560" data-h="1440">2K</button>
+        <button class="res-btn" data-w="3840" data-h="2160">4K</button>
+      </div>
+    </div>
+
     <div class="progress-wrap" id="progressWrap">
       <div class="progress-bar" id="progressBar"></div>
     </div>
@@ -547,6 +603,20 @@ codeEditor.value = DEFAULT_SVG;
 applyCode(); // render langsung
 
 // ═══════════════════════════════════════════
+// RESOLUTION SELECTOR
+// ═══════════════════════════════════════════
+let exportW = 1920, exportH = 1080;
+
+document.getElementById('resBtns').addEventListener('click', e => {
+  const btn = e.target.closest('.res-btn');
+  if (!btn) return;
+  document.querySelectorAll('.res-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  exportW = parseInt(btn.dataset.w);
+  exportH = parseInt(btn.dataset.h);
+});
+
+// ═══════════════════════════════════════════
 // TABS
 // ═══════════════════════════════════════════
 document.querySelectorAll('.tab').forEach(tab => {
@@ -636,7 +706,7 @@ function exportSVG() {
 }
 
 // ═══════════════════════════════════════════
-// EXPORT GIF (frame capture)
+// EXPORT GIF (frame capture — white bg, HD)
 // ═══════════════════════════════════════════
 async function exportGIF() {
   if (typeof GIF === 'undefined') {
@@ -648,20 +718,24 @@ async function exportGIF() {
 
   setBusy(true);
 
-  // Tentukan durasi dari atribut dur SVG (default 3s)
   const svgEl     = previewBox.querySelector('svg');
   const durAttr   = svgEl?.querySelector('[dur]')?.getAttribute('dur') || '3s';
   const durMs     = parseFloat(durAttr) * (durAttr.endsWith('ms') ? 1 : 1000);
   const FRAMES    = 40;
   const FRAME_GAP = Math.round(durMs / FRAMES);
 
+  // GIF ukuran sedang (GIF tidak efisien di resolusi sangat tinggi)
+  // Gunakan sisi terpendek dari resolusi yang dipilih, max 800px
+  const gifSize   = Math.min(Math.min(exportW, exportH), 800);
+  const captureScale = gifSize / previewBox.offsetWidth;
+
   const gif = new GIF({
     workers: 2,
-    quality: 8,
-    width: 300,
-    height: 300,
+    quality: 6,
+    width: gifSize,
+    height: gifSize,
     workerScript: 'https://cdn.jsdelivr.net/npm/gif.js@0.2.0/dist/gif.worker.js',
-    background: '#162032',
+    background: '#ffffff',
     repeat: 0
   });
 
@@ -669,17 +743,28 @@ async function exportGIF() {
 
   for (let i = 0; i < FRAMES; i++) {
     try {
-      const canvas = await html2canvas(previewBox, {
-        scale: 1.2,
-        backgroundColor: '#162032',
+      const raw = await html2canvas(previewBox, {
+        scale: captureScale,
+        backgroundColor: '#ffffff',
         logging: false,
         useCORS: true
       });
-      gif.addFrame(canvas, { delay: FRAME_GAP });
+
+      // Crop/pad ke persegi persis gifSize × gifSize
+      const sq = document.createElement('canvas');
+      sq.width = gifSize; sq.height = gifSize;
+      const sqCtx = sq.getContext('2d');
+      sqCtx.fillStyle = '#ffffff';
+      sqCtx.fillRect(0, 0, gifSize, gifSize);
+      const ox = Math.round((gifSize - raw.width)  / 2);
+      const oy = Math.round((gifSize - raw.height) / 2);
+      sqCtx.drawImage(raw, ox, oy);
+
+      gif.addFrame(sq, { delay: FRAME_GAP, copy: true });
 
       const pct = Math.round((i + 1) / FRAMES * 65);
       setProgress(pct);
-      setStatus(`🎞️ Frame ${i + 1} / ${FRAMES}`, 'info');
+      setStatus(`🎞️ Frame ${i + 1} / ${FRAMES}  (${gifSize}×${gifSize} px)`, 'info');
       await wait(FRAME_GAP);
     } catch(err) {
       setStatus('✕ Gagal capture: ' + err.message, 'err');
@@ -690,12 +775,12 @@ async function exportGIF() {
   setStatus('⚙️ Mengompres GIF...', 'info');
 
   await new Promise((resolve, reject) => {
-    const t = setTimeout(() => reject(new Error('Timeout')), 20000);
+    const t = setTimeout(() => reject(new Error('Timeout')), 30000);
     gif.on('progress', p => setProgress(65 + Math.round(p * 33)));
     gif.on('finished', blob => {
       clearTimeout(t);
-      downloadBlob(blob, 'lock-animation.gif');
-      setStatus('✓ GIF berhasil diekspor!', 'ok');
+      downloadBlob(blob, `lock-animation-${gifSize}px.gif`);
+      setStatus(`✓ GIF ${gifSize}×${gifSize}px berhasil diekspor!`, 'ok');
       setProgress(100);
       setTimeout(() => setProgress(0), 1200);
       setBusy(false);
@@ -710,7 +795,7 @@ async function exportGIF() {
 }
 
 // ═══════════════════════════════════════════
-// EXPORT MP4 / WebM (MediaRecorder)
+// EXPORT MP4 / WebM — HD, white bg
 // ═══════════════════════════════════════════
 async function exportMP4() {
   if (!window.MediaRecorder) {
@@ -721,15 +806,19 @@ async function exportMP4() {
   }
 
   setBusy(true);
-  setStatus('🎬 Menyiapkan recording...', 'info');
-  setProgress(5);
+  const W = exportW, H = exportH;
+  setStatus(`🎬 Menyiapkan ${W}×${H} recording...`, 'info');
+  setProgress(3);
 
   try {
     const svgEl   = previewBox.querySelector('svg');
     const durAttr = svgEl?.querySelector('[dur]')?.getAttribute('dur') || '3s';
     const durMs   = parseFloat(durAttr) * (durAttr.endsWith('ms') ? 1 : 1000);
     const FPS     = 30;
-    const W = 320, H = 320;
+
+    // Bitrate naik seiring resolusi: HD=8M, FHD=16M, 2K=30M, 4K=60M
+    const pixels   = W * H;
+    const bitrate  = Math.round(pixels / (1920 * 1080) * 16_000_000);
 
     const offscreen = document.createElement('canvas');
     offscreen.width  = W; offscreen.height = H;
@@ -739,7 +828,8 @@ async function exportMP4() {
                        .find(t => MediaRecorder.isTypeSupported(t)) || 'video/webm';
 
     const recorder = new MediaRecorder(offscreen.captureStream(FPS), {
-      mimeType, videoBitsPerSecond: 3_000_000
+      mimeType,
+      videoBitsPerSecond: bitrate
     });
     const chunks = [];
     recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
@@ -748,37 +838,48 @@ async function exportMP4() {
     const totalFrames = Math.ceil((durMs / 1000) * FPS);
     const frameGap    = Math.round(durMs / totalFrames);
 
+    // Scale html2canvas supaya output sesuai resolusi target
+    const captureScale = W / previewBox.offsetWidth;
+
     for (let i = 0; i < totalFrames; i++) {
       const snap = await html2canvas(previewBox, {
-        scale: W / previewBox.offsetWidth,
-        backgroundColor: '#162032',
+        scale: captureScale,
+        backgroundColor: '#ffffff',   // ← background putih
         logging: false,
         useCORS: true
       });
-      ctx.drawImage(snap, 0, 0, W, H);
 
-      const pct = 5 + Math.round((i + 1) / totalFrames * 80);
+      // Gambar ke offscreen canvas dengan background putih
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, W, H);
+
+      // Center jika aspect ratio berbeda
+      const sx = Math.round((W - snap.width)  / 2);
+      const sy = Math.round((H - snap.height) / 2);
+      ctx.drawImage(snap, sx, sy);
+
+      const pct = 3 + Math.round((i + 1) / totalFrames * 82);
       setProgress(pct);
-      setStatus(`🎬 Frame ${i + 1} / ${totalFrames}`, 'info');
+      setStatus(`🎬 Frame ${i + 1} / ${totalFrames}  [${W}×${H}]`, 'info');
       await wait(frameGap);
     }
 
     recorder.stop();
-    setStatus('⚙️ Finalizing...', 'info');
+    setStatus('⚙️ Finalizing video...', 'info');
     setProgress(90);
 
     await new Promise((res, rej) => {
       recorder.onstop = () => {
-        const ext  = mimeType.includes('mp4') ? 'mp4' : 'webm';
-        downloadBlob(new Blob(chunks, { type: mimeType }), `lock-animation.${ext}`);
-        setStatus(`✓ ${ext.toUpperCase()} berhasil diekspor!`, 'ok');
+        const ext = mimeType.includes('mp4') ? 'mp4' : 'webm';
+        downloadBlob(new Blob(chunks, { type: mimeType }), `lock-animation-${W}x${H}.${ext}`);
+        setStatus(`✓ ${ext.toUpperCase()} ${W}×${H} (${(bitrate/1_000_000).toFixed(0)} Mbps) diekspor!`, 'ok');
         setProgress(100);
-        setTimeout(() => setProgress(0), 1200);
+        setTimeout(() => setProgress(0), 1500);
         setBusy(false);
         res();
       };
       recorder.onerror = e => rej(e.error || new Error('Recorder error'));
-      setTimeout(() => rej(new Error('Timeout finalisasi')), 10000);
+      setTimeout(() => rej(new Error('Timeout finalisasi')), 15000);
     });
 
   } catch(err) {
