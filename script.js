@@ -9,7 +9,7 @@ const exportSvgBtn = document.getElementById("exportSvgBtn");
 const exportGifBtn = document.getElementById("exportGifBtn");
 const exportMp4Btn = document.getElementById("exportMp4Btn");
 
-// 🔥 CSS AWAL YANG PASTI BERGERAK (transform-origin tepat)
+// CSS awal dengan animasi yang pasti bergerak
 const DEFAULT_CSS = `
 .shackle {
   transform-origin: 120px 118px;
@@ -26,16 +26,13 @@ const DEFAULT_CSS = `
 `;
 
 cssEditor.value = DEFAULT_CSS;
-applyCSS(); // langsung terapkan
+applyCSS();
 
-// ======================== Fungsi utama ========================
 function applyCSS() {
-  const cssCode = cssEditor.value;
-  dynamicStyle.innerHTML = cssCode;
-  statusDiv.innerHTML = "✅ CSS diterapkan — animasi berjalan di preview!";
+  dynamicStyle.innerHTML = cssEditor.value;
+  statusDiv.innerHTML = "✅ CSS diterapkan — animasi berjalan";
 }
 
-// Utility download
 function download(blob, filename) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
@@ -48,10 +45,8 @@ function download(blob, filename) {
 function wait(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
 
 function setButtonsEnabled(enabled) {
-  const btns = [applyBtn, exportSvgBtn, exportGifBtn, exportMp4Btn];
-  btns.forEach(btn => { btn.disabled = !enabled; });
-  if (enabled) statusDiv.style.opacity = "1";
-  else statusDiv.style.opacity = "0.7";
+  [applyBtn, exportSvgBtn, exportGifBtn, exportMp4Btn].forEach(btn => btn.disabled = !enabled);
+  statusDiv.style.opacity = enabled ? "1" : "0.7";
 }
 
 // ======================== EXPORT SVG ========================
@@ -71,60 +66,78 @@ function exportSVG() {
   }
 }
 
-// ======================== EXPORT GIF ========================
+// ======================== EXPORT GIF (PERBAIKAN) ========================
 async function exportGIF() {
   if (typeof GIF === "undefined") {
     statusDiv.innerHTML = "❌ Library GIF error. Refresh halaman.";
     return;
   }
+  
   setButtonsEnabled(false);
-  statusDiv.innerHTML = "🎞️ Mempersiapkan GIF (2 detik, 30 frame)...";
+  statusDiv.innerHTML = "🎞️ Merekam 30 frame (2 detik)...";
   
   const totalFrames = 30;
-  const frameDelay = 2000 / totalFrames; // ~66ms
+  const frameDelay = 2000 / totalFrames;
   
   const gif = new GIF({
     workers: 2,
     quality: 10,
     width: 500,
     height: 500,
-    workerScript: "https://cdn.jsdelivr.net/npm/gif.js@0.2.0/dist/gif.worker.js"
+    workerScript: "https://cdn.jsdelivr.net/npm/gif.js@0.2.0/dist/gif.worker.js",
+    background: "#ffffff"
   });
-
+  
+  // Capture semua frame dulu
+  const canvases = [];
   for (let i = 0; i < totalFrames; i++) {
     try {
-      const canvas = await html2canvas(previewBox, { scale: 1.4, backgroundColor: "#ffffff" });
-      gif.addFrame(canvas, { delay: frameDelay });
-      statusDiv.innerHTML = `🎞️ Merekam frame ${i+1}/${totalFrames}`;
+      const canvas = await html2canvas(previewBox, { scale: 1.2, backgroundColor: "#ffffff" });
+      canvases.push(canvas);
+      statusDiv.innerHTML = `🎞️ Frame ${i+1}/${totalFrames}`;
       await wait(frameDelay);
-    } catch(err) {
+    } catch (err) {
       statusDiv.innerHTML = `❌ Capture gagal: ${err.message}`;
       setButtonsEnabled(true);
       return;
     }
   }
   
+  for (let canvas of canvases) {
+    gif.addFrame(canvas, { delay: frameDelay });
+  }
+  
   statusDiv.innerHTML = "🎬 Mengompres GIF ...";
-  gif.on("finished", (blob) => {
-    download(blob, "animation.gif");
-    statusDiv.innerHTML = "✅ GIF selesai! File sudah diunduh.";
-    setButtonsEnabled(true);
+  
+  const gifPromise = new Promise((resolve, reject) => {
+    let finished = false;
+    gif.on("finished", (blob) => { if (!finished) { finished = true; resolve(blob); } });
+    gif.on("error", (err) => { if (!finished) { finished = true; reject(err); } });
+    setTimeout(() => { if (!finished) reject(new Error("Timeout kompresi GIF")); }, 15000);
   });
-  gif.on("error", (e) => {
-    statusDiv.innerHTML = "❌ Error GIF: " + e;
-    setButtonsEnabled(true);
-  });
+  
   gif.render();
+  
+  try {
+    const blob = await gifPromise;
+    download(blob, "animation.gif");
+    statusDiv.innerHTML = "✅ GIF berhasil diekspor!";
+  } catch (err) {
+    console.error(err);
+    statusDiv.innerHTML = "❌ Gagal membuat GIF: " + err.message;
+  } finally {
+    setButtonsEnabled(true);
+  }
 }
 
-// ======================== EXPORT MP4 (FFmpeg) ========================
+// ======================== EXPORT MP4 (tetap sama) ========================
 async function exportMP4() {
   if (!window.FFmpeg) {
-    statusDiv.innerHTML = "❌ FFmpeg tidak tersedia. Coba muat ulang.";
+    statusDiv.innerHTML = "❌ FFmpeg tidak tersedia.";
     return;
   }
   setButtonsEnabled(false);
-  statusDiv.innerHTML = "⚙️ Memuat FFmpeg (sekitar 3-5 detik)...";
+  statusDiv.innerHTML = "⚙️ Memuat FFmpeg...";
   
   const { createFFmpeg, fetchFile } = FFmpeg;
   const ffmpeg = createFFmpeg({ 
@@ -134,48 +147,36 @@ async function exportMP4() {
   
   try {
     await ffmpeg.load();
-    const totalFrames = 60;  // 30fps => 2 detik
-    const frameInterval = 2000 / totalFrames; // ~33ms
+    const totalFrames = 60;
+    const frameInterval = 2000 / totalFrames;
     
-    statusDiv.innerHTML = "📸 Mengambil 60 frame (2 detik)...";
     for (let i = 0; i < totalFrames; i++) {
-      const canvas = await html2canvas(previewBox, { scale: 1.4, backgroundColor: "#ffffff" });
+      const canvas = await html2canvas(previewBox, { scale: 1.2, backgroundColor: "#ffffff" });
       const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/png"));
       const frameData = await fetchFile(blob);
-      const frameName = `frame_${i.toString().padStart(3, '0')}.png`;
-      ffmpeg.FS("writeFile", frameName, frameData);
+      ffmpeg.FS("writeFile", `frame_${i.toString().padStart(3, '0')}.png`, frameData);
       statusDiv.innerHTML = `📸 Frame ${i+1}/${totalFrames}`;
       await wait(frameInterval);
     }
     
     statusDiv.innerHTML = "🎬 Encoding MP4...";
-    await ffmpeg.run(
-      "-framerate", "30",
-      "-i", "frame_%03d.png",
-      "-c:v", "libx264",
-      "-pix_fmt", "yuv420p",
-      "-y",
-      "output.mp4"
-    );
-    
+    await ffmpeg.run("-framerate", "30", "-i", "frame_%03d.png", "-c:v", "libx264", "-pix_fmt", "yuv420p", "-y", "output.mp4");
     const data = ffmpeg.FS("readFile", "output.mp4");
     const blob = new Blob([data.buffer], { type: "video/mp4" });
-    download(blob, "animated_lock.mp4");
+    download(blob, "animation.mp4");
     
-    // Bersihkan file frame
     for (let i = 0; i < totalFrames; i++) {
       ffmpeg.FS("unlink", `frame_${i.toString().padStart(3, '0')}.png`);
     }
     statusDiv.innerHTML = "🎉 MP4 berhasil diekspor!";
   } catch(err) {
-    console.error(err);
     statusDiv.innerHTML = "❌ Gagal buat MP4: " + err.message;
   } finally {
     setButtonsEnabled(true);
   }
 }
 
-// ======================== PASANG EVENT LISTENER ========================
+// ======================== EVENT LISTENER ========================
 applyBtn.addEventListener("click", applyCSS);
 exportSvgBtn.addEventListener("click", exportSVG);
 exportGifBtn.addEventListener("click", exportGIF);
