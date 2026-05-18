@@ -6,15 +6,18 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>SVG Animation Studio PRO</title>
+<title>SVG Animation Studio</title>
 
 <link rel="stylesheet" href="style.css">
 
-<!-- GIF.js -->
+<!-- GIF -->
 <script src="https://cdn.jsdelivr.net/npm/gif.js.optimized/dist/gif.js"></script>
 
-<!-- html2canvas -->
+<!-- HTML2CANVAS -->
 <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+
+<!-- FFMPEG -->
+<script src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.6/dist/ffmpeg.min.js"></script>
 
 </head>
 
@@ -23,9 +26,9 @@
 <div class="container">
 
     <!-- LEFT -->
-    <div class="editor-panel">
+    <div class="left-panel">
 
-        <h2>Animation CSS</h2>
+        <h2>CSS Animation</h2>
 
         <textarea id="cssEditor">
 .shackle{
@@ -51,42 +54,32 @@
 }
         </textarea>
 
-        <div class="buttons">
+        <div class="toolbar">
 
             <button onclick="applyCSS()">
                 Apply
             </button>
 
-            <select id="exportType">
+            <button onclick="exportSVG()">
+                SVG
+            </button>
 
-                <option value="svg">
-                    SVG
-                </option>
+            <button onclick="exportGIF()">
+                GIF
+            </button>
 
-                <option value="html">
-                    HTML
-                </option>
-
-                <option value="gif">
-                    GIF
-                </option>
-
-                <option value="mp4">
-                    MP4
-                </option>
-
-            </select>
-
-            <button onclick="downloadFile()">
-                Export
+            <button onclick="exportMP4()">
+                MP4
             </button>
 
         </div>
 
+        <div id="status"></div>
+
     </div>
 
     <!-- RIGHT -->
-    <div class="preview-panel">
+    <div class="right-panel">
 
         <div id="preview">
 
@@ -116,50 +109,18 @@
                 <rect
                     x="55"
                     y="120"
-                    rx="14"
-                    ry="14"
                     width="190"
                     height="150"
+                    rx="14"
                     fill="#F7C600"
-                />
-
-                <!-- HIGHLIGHT -->
-                <path
-                    d="
-                    M65 130
-                    Q90 120 110 130
-                    Q80 170 65 190
-                    Z"
-                    fill="#FFD93D"
-                    opacity="0.7"
-                />
-
-                <!-- SHADOW -->
-                <path
-                    d="
-                    M55 250
-                    Q150 235 245 170
-                    L245 270
-                    L55 270
-                    Z"
-                    fill="#F2B316"
                 />
 
                 <!-- KEYHOLE -->
                 <circle
                     cx="150"
-                    cy="175"
+                    cy="180"
                     r="18"
                     fill="#555"
-                />
-
-                <path
-                    d="
-                    M150 190
-                    L138 235
-                    L162 235
-                    Z"
-                    fill="#444"
                 />
 
             </svg>
