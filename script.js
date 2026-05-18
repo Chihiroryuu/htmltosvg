@@ -1,3 +1,6 @@
+const statusText =
+    document.getElementById("status");
+
 /* APPLY CSS */
 function applyCSS(){
 
@@ -9,159 +12,8 @@ function applyCSS(){
         .innerHTML = css;
 }
 
-/* EXPORT */
-async function downloadFile(){
-
-    const type =
-        document.getElementById("exportType").value;
-
-    if(type === "svg"){
-
-        exportSVG();
-    }
-
-    if(type === "html"){
-
-        exportHTML();
-    }
-
-    if(type === "gif"){
-
-        exportGIF();
-    }
-
-    if(type === "mp4"){
-
-        exportMP4();
-    }
-}
-
-/* SVG */
-function exportSVG(){
-
-    const svg =
-        document.getElementById("svgCanvas")
-        .outerHTML;
-
-    download(
-        svg,
-        "animation.svg",
-        "image/svg+xml"
-    );
-}
-
-/* HTML */
-function exportHTML(){
-
-    const svg =
-        document.getElementById("svgCanvas")
-        .outerHTML;
-
-    const html = `
-<!DOCTYPE html>
-<html>
-<body>
-${svg}
-</body>
-</html>
-    `;
-
-    download(
-        html,
-        "animation.html",
-        "text/html"
-    );
-}
-
-/* GIF EXPORT */
-async function exportGIF(){
-
-    const preview =
-        document.getElementById("preview");
-
-    const gif = new GIF({
-
-        workers:2,
-        quality:10,
-
-        width:400,
-        height:400
-    });
-
-    /* Capture Frames */
-    for(let i=0;i<20;i++){
-
-        const canvas =
-            await html2canvas(preview);
-
-        gif.addFrame(canvas,{
-            delay:100
-        });
-
-        await wait(100);
-    }
-
-    gif.on("finished",function(blob){
-
-        downloadBlob(blob,"animation.gif");
-    });
-
-    gif.render();
-}
-
-/* MP4 EXPORT */
-async function exportMP4(){
-
-    const preview =
-        document.getElementById("preview");
-
-    const stream =
-        preview.captureStream(30);
-
-    const recorder =
-        new MediaRecorder(stream,{
-
-            mimeType:"video/webm"
-        });
-
-    let chunks = [];
-
-    recorder.ondataavailable =
-        e => chunks.push(e.data);
-
-    recorder.onstop = () => {
-
-        const blob =
-            new Blob(chunks,{
-
-                type:"video/webm"
-            });
-
-        downloadBlob(
-            blob,
-            "animation.webm"
-        );
-    };
-
-    recorder.start();
-
-    setTimeout(()=>{
-
-        recorder.stop();
-
-    },5000);
-}
-
 /* DOWNLOAD */
-function download(content,name,type){
-
-    const blob =
-        new Blob([content],{type});
-
-    downloadBlob(blob,name);
-}
-
-function downloadBlob(blob,name){
+function download(blob,name){
 
     const url =
         URL.createObjectURL(blob);
@@ -176,6 +28,139 @@ function downloadBlob(blob,name){
     a.click();
 
     URL.revokeObjectURL(url);
+}
+
+/* SVG */
+function exportSVG(){
+
+    const svg =
+        document
+        .getElementById("svgCanvas")
+        .outerHTML;
+
+    const blob =
+        new Blob(
+            [svg],
+            {type:"image/svg+xml"}
+        );
+
+    download(blob,"animation.svg");
+}
+
+/* GIF */
+async function exportGIF(){
+
+    statusText.innerHTML =
+        "Rendering GIF...";
+
+    const preview =
+        document.getElementById("preview");
+
+    const gif = new GIF({
+
+        workers:2,
+        quality:10,
+        width:500,
+        height:500
+    });
+
+    for(let i=0;i<30;i++){
+
+        const canvas =
+            await html2canvas(preview);
+
+        gif.addFrame(canvas,{
+            delay:100
+        });
+
+        await wait(100);
+    }
+
+    gif.on("finished",function(blob){
+
+        download(blob,"animation.gif");
+
+        statusText.innerHTML =
+            "GIF Exported";
+    });
+
+    gif.render();
+}
+
+/* MP4 */
+async function exportMP4(){
+
+    statusText.innerHTML =
+        "Loading FFmpeg...";
+
+    const { createFFmpeg, fetchFile } =
+        FFmpeg;
+
+    const ffmpeg =
+        createFFmpeg({
+            log:true
+        });
+
+    await ffmpeg.load();
+
+    statusText.innerHTML =
+        "Capturing frames...";
+
+    const preview =
+        document.getElementById("preview");
+
+    for(let i=0;i<60;i++){
+
+        const canvas =
+            await html2canvas(preview);
+
+        const blob =
+            await new Promise(
+                resolve =>
+                    canvas.toBlob(resolve)
+            );
+
+        ffmpeg.FS(
+            "writeFile",
+            `frame${i}.png`,
+            await fetchFile(blob)
+        );
+
+        await wait(100);
+    }
+
+    statusText.innerHTML =
+        "Encoding MP4...";
+
+    await ffmpeg.run(
+
+        "-framerate","30",
+
+        "-i","frame%d.png",
+
+        "-c:v","libx264",
+
+        "-pix_fmt","yuv420p",
+
+        "output.mp4"
+    );
+
+    const data =
+        ffmpeg.FS(
+            "readFile",
+            "output.mp4"
+        );
+
+    const blob =
+        new Blob(
+            [data.buffer],
+            {type:"video/mp4"}
+        );
+
+    download(blob,"animation.mp4");
+
+    statusText.innerHTML =
+        "MP4 Exported";
 }
 
 /* WAIT */
