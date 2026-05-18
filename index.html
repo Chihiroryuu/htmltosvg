@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SVG Lock Animator</title>
+  <title>SVG Lock Animator — SMIL</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Sora:wght@400;600;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -17,9 +17,8 @@
       --navy: #0D1B2A;
       --navy-mid: #162032;
       --navy-soft: #1E2E42;
-      --panel-bg: #F4F6FA;
-      --border: rgba(255,255,255,0.08);
-      --text-dim: rgba(255,255,255,0.45);
+      --border: rgba(255,255,255,0.07);
+      --text-dim: rgba(255,255,255,0.4);
       --radius: 16px;
       --radius-sm: 10px;
     }
@@ -34,8 +33,9 @@
 
     /* ── LEFT PANEL ── */
     .editor-panel {
-      width: 420px;
-      min-width: 320px;
+      width: 46%;
+      min-width: 340px;
+      max-width: 540px;
       background: var(--navy-mid);
       display: flex;
       flex-direction: column;
@@ -43,152 +43,200 @@
     }
 
     .panel-header {
-      padding: 22px 24px 18px;
+      padding: 18px 20px 16px;
       border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
       gap: 12px;
+      flex-shrink: 0;
     }
 
-    .lock-icon {
-      width: 36px; height: 36px;
+    .logo {
+      width: 34px; height: 34px;
       background: var(--gold);
       border-radius: 8px;
       display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
     }
 
-    .lock-icon svg { width: 18px; height: 18px; fill: var(--navy); }
+    .logo svg { width: 17px; height: 17px; fill: var(--navy); }
 
-    .panel-header h1 {
-      font-size: 0.95rem;
-      font-weight: 700;
-      color: #fff;
-      letter-spacing: 0.02em;
+    .panel-header h1 { font-size: 0.88rem; font-weight: 700; color: #fff; }
+    .panel-header p  { font-size: 0.68rem; color: var(--text-dim); margin-top: 2px; }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
     }
 
-    .panel-header span {
-      font-size: 0.7rem;
-      font-weight: 400;
-      color: var(--text-dim);
-      display: block;
-      margin-top: 1px;
-    }
-
-    .editor-wrapper {
+    .tab {
       flex: 1;
-      padding: 16px;
+      padding: 10px 12px;
+      font-family: 'Sora', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      color: var(--text-dim);
+      background: none;
+      border: none;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.18s;
+    }
+
+    .tab:hover { color: rgba(255,255,255,0.7); }
+    .tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+
+    /* Editor */
+    .editor-wrap {
+      flex: 1;
       overflow: hidden;
       display: flex;
       flex-direction: column;
+      padding: 12px 14px;
     }
 
-    .editor-label {
-      font-size: 0.65rem;
-      font-weight: 600;
-      color: var(--gold);
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
+    .editor-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       margin-bottom: 8px;
     }
 
-    textarea#cssEditor {
+    .editor-lang {
+      font-size: 0.6rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--gold);
+    }
+
+    .shortcut-hint {
+      font-size: 0.6rem;
+      color: var(--text-dim);
+      background: rgba(255,255,255,0.05);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    textarea#codeEditor {
       flex: 1;
       background: var(--navy);
-      color: #7DDFA3;
+      color: #88d0f0;
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
-      padding: 16px;
+      padding: 14px;
       font-family: 'JetBrains Mono', monospace;
-      font-size: 12.5px;
-      line-height: 1.7;
+      font-size: 11.5px;
+      line-height: 1.75;
       resize: none;
       outline: none;
+      tab-size: 4;
       transition: border-color 0.2s;
+      white-space: pre;
+      overflow-wrap: normal;
+      overflow-x: auto;
     }
 
-    textarea#cssEditor:focus {
-      border-color: rgba(245,166,35,0.4);
-    }
+    textarea#codeEditor:focus { border-color: rgba(245,166,35,0.35); }
 
-    .toolbar-area {
-      padding: 14px 16px 16px;
+    /* Bottom toolbar */
+    .toolbar {
+      padding: 12px 14px 14px;
       border-top: 1px solid var(--border);
+      flex-shrink: 0;
     }
 
     .btn-apply {
       width: 100%;
-      padding: 11px;
+      padding: 10px;
       background: var(--gold);
       color: var(--navy);
       border: none;
       border-radius: var(--radius-sm);
       font-family: 'Sora', sans-serif;
-      font-size: 0.82rem;
+      font-size: 0.8rem;
       font-weight: 700;
       cursor: pointer;
       letter-spacing: 0.04em;
       transition: all 0.18s;
+      margin-bottom: 9px;
+    }
+
+    .btn-apply:hover   { background: var(--gold-light); transform: translateY(-1px); }
+    .btn-apply:active  { transform: scale(0.98); }
+    .btn-apply:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+    .export-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 7px;
       margin-bottom: 10px;
     }
 
-    .btn-apply:hover { background: var(--gold-light); transform: translateY(-1px); }
-    .btn-apply:active { transform: translateY(0); }
-
-    .export-group {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 8px;
-      margin-bottom: 12px;
-    }
-
-    .btn-export {
-      padding: 9px 6px;
+    .btn-exp {
+      padding: 8px 4px;
       background: var(--navy-soft);
-      color: rgba(255,255,255,0.8);
+      color: rgba(255,255,255,0.75);
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
       font-family: 'Sora', sans-serif;
-      font-size: 0.72rem;
+      font-size: 0.7rem;
       font-weight: 600;
       cursor: pointer;
       letter-spacing: 0.03em;
       transition: all 0.18s;
-      display: flex; align-items: center; justify-content: center; gap: 5px;
+      display: flex; align-items: center; justify-content: center; gap: 4px;
     }
 
-    .btn-export:hover:not(:disabled) {
-      background: rgba(245,166,35,0.12);
-      border-color: rgba(245,166,35,0.35);
-      color: var(--gold);
+    .btn-exp:hover:not(:disabled) {
+      background: rgba(245,166,35,0.1);
+      border-color: rgba(245,166,35,0.3);
+      color: var(--gold-light);
     }
 
-    .btn-export:disabled {
-      opacity: 0.35;
-      cursor: not-allowed;
+    .btn-exp:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    .progress-wrap {
+      height: 3px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-bottom: 8px;
+      display: none;
     }
 
-    .btn-export .icon { font-size: 14px; }
+    .progress-wrap.show { display: block; }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: var(--gold);
+      border-radius: 3px;
+      transition: width 0.1s linear;
+    }
 
     #status {
       background: var(--navy);
       border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 9px 14px;
-      font-size: 0.75rem;
-      color: rgba(255,255,255,0.55);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 0.72rem;
+      color: rgba(255,255,255,0.5);
       text-align: center;
-      min-height: 36px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: color 0.2s;
+      min-height: 34px;
+      display: flex; align-items: center; justify-content: center;
     }
 
     #status.ok   { color: #7DDFA3; }
-    #status.err  { color: #F07070; }
+    #status.err  { color: #F07878; }
     #status.info { color: var(--gold-light); }
 
-    /* ── RIGHT PANEL ── */
+    /* ── RIGHT: PREVIEW ── */
     .preview-panel {
       flex: 1;
       display: flex;
@@ -197,209 +245,334 @@
       justify-content: center;
       background: var(--navy);
       position: relative;
+      overflow: hidden;
     }
 
-    .preview-bg {
-      position: absolute; inset: 0;
-      background-image:
-        radial-gradient(circle at 60% 35%, rgba(245,166,35,0.06) 0%, transparent 55%),
-        radial-gradient(circle at 20% 70%, rgba(100,160,255,0.05) 0%, transparent 45%);
-      pointer-events: none;
+    .preview-glow {
+      position: absolute; inset: 0; pointer-events: none;
+      background:
+        radial-gradient(ellipse 60% 50% at 60% 40%, rgba(245,166,35,0.07) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 40% at 25% 70%, rgba(80,140,220,0.05) 0%, transparent 50%);
     }
 
     .preview-label {
-      position: absolute;
-      top: 22px; left: 24px;
-      font-size: 0.65rem;
-      font-weight: 600;
-      color: var(--text-dim);
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
+      position: absolute; top: 20px; left: 22px;
+      font-size: 0.6rem; font-weight: 600;
+      color: var(--text-dim); letter-spacing: 0.12em; text-transform: uppercase;
+    }
+
+    .badge-smil {
+      position: absolute; top: 20px; right: 22px;
+      font-size: 0.6rem; font-weight: 700;
+      color: var(--gold); background: rgba(245,166,35,0.1);
+      border: 1px solid rgba(245,166,35,0.2);
+      border-radius: 6px; padding: 3px 9px;
+      letter-spacing: 0.08em;
     }
 
     #previewBox {
       background: var(--navy-mid);
-      border: 1px solid var(--border);
-      border-radius: 32px;
-      padding: 44px 40px;
-      box-shadow: 0 40px 80px -20px rgba(0,0,0,0.5);
-      position: relative;
-      z-index: 1;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 28px;
+      padding: 40px 36px;
+      box-shadow: 0 40px 80px -20px rgba(0,0,0,0.6);
+      position: relative; z-index: 1;
+      transition: box-shadow 0.3s;
     }
 
-    #svgCanvas {
-      width: 240px;
+    #previewBox:hover {
+      box-shadow: 0 40px 80px -20px rgba(0,0,0,0.7), 0 0 0 1px rgba(245,166,35,0.1);
+    }
+
+    #previewBox svg {
+      width: 220px;
       height: auto;
       display: block;
     }
 
     .preview-hint {
-      position: absolute;
-      bottom: 22px;
-      font-size: 0.68rem;
-      color: var(--text-dim);
-      letter-spacing: 0.06em;
+      position: absolute; bottom: 18px;
+      font-size: 0.62rem; color: var(--text-dim);
+      letter-spacing: 0.05em;
     }
 
-    /* ── RESPONSIVE ── */
-    @media (max-width: 680px) {
-      body { flex-direction: column; height: auto; overflow: auto; }
-      .editor-panel { width: 100%; min-width: unset; }
-      textarea#cssEditor { height: 220px; }
-      .preview-panel { height: 380px; }
-    }
-
-    /* ── PROGRESS BAR ── */
-    .progress-bar-wrap {
-      width: 100%;
-      height: 3px;
-      background: var(--border);
-      border-radius: 3px;
-      overflow: hidden;
-      margin-bottom: 8px;
+    /* ── HELP PANEL (tab 2) ── */
+    .help-content {
       display: none;
+      flex: 1;
+      overflow-y: auto;
+      padding: 14px;
+      gap: 10px;
+      flex-direction: column;
     }
-    .progress-bar-wrap.visible { display: block; }
-    .progress-bar {
-      height: 100%;
-      background: var(--gold);
-      width: 0%;
-      transition: width 0.1s linear;
-      border-radius: 3px;
+
+    .help-content.active { display: flex; }
+
+    .help-section {
+      background: var(--navy);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+    }
+
+    .help-section h3 {
+      font-size: 0.72rem; font-weight: 700;
+      color: var(--gold); margin-bottom: 6px;
+      letter-spacing: 0.05em; text-transform: uppercase;
+    }
+
+    .help-section p, .help-section li {
+      font-size: 0.72rem;
+      color: rgba(255,255,255,0.6);
+      line-height: 1.65;
+    }
+
+    .help-section ul { padding-left: 14px; }
+    .help-section li { margin-bottom: 3px; }
+
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem;
+      color: #88d0f0;
+      background: rgba(136,208,240,0.1);
+      padding: 1px 5px;
+      border-radius: 4px;
+    }
+
+    .smil-tip {
+      display: flex; align-items: flex-start; gap: 8px;
+      background: rgba(245,166,35,0.07);
+      border: 1px solid rgba(245,166,35,0.15);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.65);
+      line-height: 1.6;
+    }
+
+    .smil-tip .icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+
+    @media (max-width: 720px) {
+      body { flex-direction: column; height: auto; overflow: auto; }
+      .editor-panel { width: 100%; min-width: unset; max-width: unset; }
+      textarea#codeEditor { height: 200px; }
+      .preview-panel { min-height: 360px; }
     }
   </style>
 </head>
 <body>
 
-<!-- ══ LEFT: CSS EDITOR ══ -->
+<!-- ══ LEFT PANEL ══ -->
 <div class="editor-panel">
+
   <div class="panel-header">
-    <div class="lock-icon">
-      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <path d="M18 11H6V9a6 6 0 1 1 12 0v2zm-6 7a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm6 2H6a2 2 0 0 1-2-2v-7h16v7a2 2 0 0 1-2 2z"/>
-      </svg>
+    <div class="logo">
+      <svg viewBox="0 0 24 24"><path d="M18 11H6V9a6 6 0 1 1 12 0v2zm-6 7a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm6 2H6a2 2 0 0 1-2-2v-7h16v7a2 2 0 0 1-2 2z"/></svg>
     </div>
     <div>
       <h1>SVG Lock Animator</h1>
-      <span>Edit CSS · Preview · Export</span>
+      <p>SMIL · Export animated SVG / GIF / MP4</p>
     </div>
   </div>
 
-  <div class="editor-wrapper">
-    <div class="editor-label">CSS Animation</div>
-    <textarea id="cssEditor" spellcheck="false"></textarea>
+  <div class="tabs">
+    <button class="tab active" data-tab="editor">&#60;&#47;&#62; Editor SVG</button>
+    <button class="tab"        data-tab="help">? Panduan SMIL</button>
   </div>
 
-  <div class="toolbar-area">
+  <!-- TAB: EDITOR -->
+  <div id="tabEditor" class="editor-wrap">
+    <div class="editor-meta">
+      <span class="editor-lang">SVG + SMIL</span>
+      <span class="shortcut-hint">Ctrl+Enter = Apply</span>
+    </div>
+    <textarea id="codeEditor" spellcheck="false"></textarea>
+  </div>
+
+  <!-- TAB: HELP -->
+  <div id="tabHelp" class="help-content">
+    <div class="smil-tip">
+      <span class="icon">💡</span>
+      <span>SMIL adalah animasi native SVG — animasi tetap berjalan saat file SVG dibuka di browser maupun diembed, tanpa membutuhkan CSS atau JavaScript.</span>
+    </div>
+    <div class="help-section">
+      <h3>Elemen Animasi Utama</h3>
+      <ul>
+        <li><code>&lt;animateTransform&gt;</code> — rotate, scale, translate, skewX/Y</li>
+        <li><code>&lt;animate&gt;</code> — animasi atribut biasa (fill, opacity, r, dll)</li>
+        <li><code>&lt;animateMotion&gt;</code> — gerak sepanjang path</li>
+        <li><code>&lt;set&gt;</code> — langsung set atribut di waktu tertentu</li>
+      </ul>
+    </div>
+    <div class="help-section">
+      <h3>Atribut Penting</h3>
+      <ul>
+        <li><code>dur</code> — durasi, misal <code>3s</code> atau <code>500ms</code></li>
+        <li><code>repeatCount</code> — <code>indefinite</code> atau angka</li>
+        <li><code>values</code> — list nilai, dipisah titik-koma</li>
+        <li><code>keyTimes</code> — timing 0–1 tiap value</li>
+        <li><code>calcMode</code> — <code>spline</code>, <code>linear</code>, <code>discrete</code>, <code>paced</code></li>
+        <li><code>keySplines</code> — kurva cubic-bezier per segmen (butuh <code>calcMode="spline"</code>)</li>
+        <li><code>additive="sum"</code> — gabungkan dengan animasi lain pada elemen yang sama</li>
+        <li><code>begin</code> — delay awal, misal <code>1s</code></li>
+      </ul>
+    </div>
+    <div class="help-section">
+      <h3>Rotate vs. Translate (additive)</h3>
+      <p>Untuk kombinasi rotate + translate seperti shackle gembok, gunakan dua <code>&lt;animateTransform&gt;</code> dengan <code>additive="sum"</code> pada elemen yang sama agar keduanya diterapkan sekaligus.</p>
+    </div>
+    <div class="help-section">
+      <h3>Tips Export</h3>
+      <ul>
+        <li><strong>SVG</strong> — animasi SMIL tetap jalan di browser (Chrome, Firefox, Edge). Tidak jalan di IE.</li>
+        <li><strong>GIF</strong> — hasil frame-by-frame, cocok untuk sharing.</li>
+        <li><strong>MP4/WebM</strong> — kualitas terbaik, gunakan untuk presentasi.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- TOOLBAR -->
+  <div class="toolbar">
     <button class="btn-apply" id="applyBtn">▶ Apply &amp; Preview</button>
 
-    <div class="export-group">
-      <button class="btn-export" id="exportSvgBtn">
-        <span class="icon">📄</span> SVG
-      </button>
-      <button class="btn-export" id="exportGifBtn">
-        <span class="icon">🎞️</span> GIF
-      </button>
-      <button class="btn-export" id="exportMp4Btn">
-        <span class="icon">🎬</span> MP4
-      </button>
+    <div class="export-row">
+      <button class="btn-exp" id="exportSvgBtn">📄 SVG</button>
+      <button class="btn-exp" id="exportGifBtn">🎞️ GIF</button>
+      <button class="btn-exp" id="exportMp4Btn">🎬 MP4</button>
     </div>
 
-    <div class="progress-bar-wrap" id="progressWrap">
+    <div class="progress-wrap" id="progressWrap">
       <div class="progress-bar" id="progressBar"></div>
     </div>
 
-    <div id="status" class="ok">✓ Siap — klik Apply untuk menjalankan animasi</div>
+    <div id="status" class="ok">✓ Siap — klik Apply untuk memuat animasi</div>
   </div>
 </div>
 
 <!-- ══ RIGHT: PREVIEW ══ -->
 <div class="preview-panel">
-  <div class="preview-bg"></div>
+  <div class="preview-glow"></div>
   <div class="preview-label">Live Preview</div>
+  <div class="badge-smil">SMIL</div>
 
   <div id="previewBox">
-    <svg id="svgCanvas" viewBox="0 0 300 320" xmlns="http://www.w3.org/2000/svg">
-      <style id="dynamicStyle"></style>
-
-      <!-- Shackle -->
-      <g class="shackle">
-        <path d="M95 130 L95 85 A55 55 0 0 1 205 85 L205 130"
-              fill="none" stroke="#888" stroke-width="22" stroke-linecap="round"/>
-        <path d="M95 130 L95 85 A55 55 0 0 1 205 85 L205 130"
-              fill="none" stroke="#aaa" stroke-width="8" stroke-linecap="round" opacity="0.3"/>
-      </g>
-
-      <!-- Body -->
-      <rect x="55" y="120" rx="16" ry="16" width="190" height="150" fill="#F7C600"/>
-      <!-- Highlight -->
-      <path d="M65 130 Q90 120 112 132 Q82 172 66 192 Z" fill="#FFD93D" opacity="0.6"/>
-      <!-- Shadow -->
-      <path d="M55 252 Q150 237 245 172 L245 270 Q55 270 55 252 Z" fill="#E5A800" opacity="0.7"/>
-
-      <!-- Keyhole -->
-      <circle cx="150" cy="178" r="20" fill="#4A3B00"/>
-      <circle cx="150" cy="178" r="17" fill="#3A2D00"/>
-      <path d="M150 192 L137 234 L163 234 Z" fill="#3A2D00"/>
-      <!-- Keyhole shine -->
-      <circle cx="144" cy="172" r="4" fill="rgba(255,255,255,0.12)"/>
-    </svg>
+    <!-- SVG di-inject via JS -->
   </div>
 
-  <div class="preview-hint">Animasi berjalan secara real-time</div>
+  <div class="preview-hint">Animasi berjalan native — tidak butuh CSS / JS</div>
 </div>
 
 <script>
-// ═══════════════════════════════════════════════
+// ═══════════════════════════════════════════
+// DEFAULT SVG + SMIL
+// ═══════════════════════════════════════════
+const DEFAULT_SVG = `<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 400 300">
+
+  <!-- SHACKLE / HANDLE -->
+  <g>
+    <path
+      d="M145 125 L145 85 A55 55 0 0 1 255 85 L255 125"
+      fill="none"
+      stroke="#888"
+      stroke-width="22"
+      stroke-linecap="round">
+
+      <!-- Rotate pivot: tengah atas gembok -->
+      <animateTransform
+        attributeName="transform"
+        attributeType="XML"
+        type="rotate"
+        values="0 200 120; -18 200 120; -18 200 120; 0 200 120; 0 200 120"
+        keyTimes="0; 0.25; 0.5; 0.75; 1"
+        dur="3s"
+        repeatCount="indefinite"
+        calcMode="spline"
+        keySplines="0.42 0 0.58 1; 0.42 0 0.58 1; 0.42 0 0.58 1; 0.42 0 0.58 1"
+      />
+      <!-- Translate supaya shackle terangkat sedikit -->
+      <animateTransform
+        attributeName="transform"
+        attributeType="XML"
+        additive="sum"
+        type="translate"
+        values="0 0; -10 -10; -10 -10; 0 0; 0 0"
+        keyTimes="0; 0.25; 0.5; 0.75; 1"
+        dur="3s"
+        repeatCount="indefinite"
+        calcMode="spline"
+        keySplines="0.42 0 0.58 1; 0.42 0 0.58 1; 0.42 0 0.58 1; 0.42 0 0.58 1"
+      />
+    </path>
+  </g>
+
+  <!-- BODY GEMBOK -->
+  <rect x="105" y="120" rx="14" ry="14" width="190" height="150" fill="#F7C600"/>
+
+  <!-- HIGHLIGHT -->
+  <path
+    d="M115 130 Q140 120 160 130 Q130 170 115 190 Z"
+    fill="#FFD93D" opacity="0.7"/>
+
+  <!-- BAYANGAN BAWAH -->
+  <path
+    d="M105 250 Q200 235 295 170 L295 270 L105 270 Z"
+    fill="#E5A800"/>
+
+  <!-- LUBANG KUNCI -->
+  <circle cx="200" cy="175" r="18" fill="#4A3B00"/>
+  <circle cx="200" cy="175" r="15" fill="#3A2D00"/>
+  <path d="M200 190 L188 233 L212 233 Z" fill="#3A2D00"/>
+  <circle cx="195" cy="170" r="4" fill="rgba(255,255,255,0.1)"/>
+
+</svg>`;
+
+// ═══════════════════════════════════════════
 // ELEMENTS
-// ═══════════════════════════════════════════════
-const cssEditor    = document.getElementById('cssEditor');
-const dynamicStyle = document.getElementById('dynamicStyle');
-const statusDiv    = document.getElementById('status');
-const previewBox   = document.getElementById('previewBox');
-const progressWrap = document.getElementById('progressWrap');
-const progressBar  = document.getElementById('progressBar');
+// ═══════════════════════════════════════════
+const codeEditor  = document.getElementById('codeEditor');
+const previewBox  = document.getElementById('previewBox');
+const statusEl    = document.getElementById('status');
+const progressWrap= document.getElementById('progressWrap');
+const progressBar = document.getElementById('progressBar');
 
-const applyBtn      = document.getElementById('applyBtn');
-const exportSvgBtn  = document.getElementById('exportSvgBtn');
-const exportGifBtn  = document.getElementById('exportGifBtn');
-const exportMp4Btn  = document.getElementById('exportMp4Btn');
-const allBtns       = [applyBtn, exportSvgBtn, exportGifBtn, exportMp4Btn];
+const applyBtn     = document.getElementById('applyBtn');
+const exportSvgBtn = document.getElementById('exportSvgBtn');
+const exportGifBtn = document.getElementById('exportGifBtn');
+const exportMp4Btn = document.getElementById('exportMp4Btn');
+const allBtns      = [applyBtn, exportSvgBtn, exportGifBtn, exportMp4Btn];
 
-// ═══════════════════════════════════════════════
-// DEFAULT CSS
-// ═══════════════════════════════════════════════
-const DEFAULT_CSS = `.shackle {
-  transform-origin: 150px 130px;
-  animation: unlock 2.4s infinite ease-in-out;
-}
+codeEditor.value = DEFAULT_SVG;
+applyCode(); // render langsung
 
-@keyframes unlock {
-  0%   { transform: rotate(0deg) translateY(0px); }
-  25%  { transform: rotate(-24deg) translate(-10px, -10px); }
-  50%  { transform: rotate(-24deg) translate(-10px, -10px); }
-  75%  { transform: rotate(4deg) translate(2px, -2px); }
-  100% { transform: rotate(0deg) translateY(0px); }
-}
-`;
+// ═══════════════════════════════════════════
+// TABS
+// ═══════════════════════════════════════════
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    const which = tab.dataset.tab;
+    document.getElementById('tabEditor').style.display = which === 'editor' ? 'flex' : 'none';
+    document.getElementById('tabHelp').classList.toggle('active', which === 'help');
+  });
+});
 
-cssEditor.value = DEFAULT_CSS;
-applyCSS();
-
-// ═══════════════════════════════════════════════
+// ═══════════════════════════════════════════
 // HELPERS
-// ═══════════════════════════════════════════════
+// ═══════════════════════════════════════════
 function setStatus(msg, type = 'ok') {
-  statusDiv.textContent = msg;
-  statusDiv.className = type;
+  statusEl.textContent = msg;
+  statusEl.className   = type;
 }
 
 function setProgress(pct) {
   if (pct <= 0) {
-    progressWrap.classList.remove('visible');
+    progressWrap.classList.remove('show');
     progressBar.style.width = '0%';
   } else {
-    progressWrap.classList.add('visible');
+    progressWrap.classList.add('show');
     progressBar.style.width = Math.min(pct, 100) + '%';
   }
 }
@@ -410,106 +583,117 @@ function setBusy(busy) {
 
 function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
 
-function downloadBlob(blob, filename) {
+function downloadBlob(blob, name) {
   const url = URL.createObjectURL(blob);
-  const a   = document.createElement('a');
-  a.href = url; a.download = filename; a.click();
+  Object.assign(document.createElement('a'), { href: url, download: name }).click();
   setTimeout(() => URL.revokeObjectURL(url), 5000);
 }
 
-// ═══════════════════════════════════════════════
-// APPLY CSS
-// ═══════════════════════════════════════════════
-function applyCSS() {
+// ═══════════════════════════════════════════
+// APPLY: inject SVG ke previewBox
+// ═══════════════════════════════════════════
+function applyCode() {
   try {
-    dynamicStyle.innerHTML = cssEditor.value;
-    setStatus('✓ CSS diterapkan — animasi berjalan', 'ok');
+    const raw = codeEditor.value.trim();
+
+    // Minimal sanity check
+    if (!raw.includes('<svg') || !raw.includes('</svg>')) {
+      setStatus('✕ Kode harus berisi tag <svg>…</svg>', 'err'); return;
+    }
+
+    // Inject — browser akan langsung jalankan SMIL
+    previewBox.innerHTML = raw;
+
+    // Pastikan SVG mengisi previewBox dengan rapi
+    const svgEl = previewBox.querySelector('svg');
+    if (svgEl) {
+      svgEl.style.width  = '220px';
+      svgEl.style.height = 'auto';
+      svgEl.style.display= 'block';
+    }
+
+    setStatus('✓ SVG dimuat — animasi SMIL berjalan', 'ok');
   } catch(e) {
     setStatus('✕ Error: ' + e.message, 'err');
   }
 }
 
-// ═══════════════════════════════════════════════
-// EXPORT SVG
-// ═══════════════════════════════════════════════
+// ═══════════════════════════════════════════
+// EXPORT SVG (langsung dari editor — animasi SMIL intact)
+// ═══════════════════════════════════════════
 function exportSVG() {
   try {
-    const svgEl  = document.getElementById('svgCanvas');
-    const clone  = svgEl.cloneNode(true);
-    const serial = new XMLSerializer();
-    const svgStr = '<?xml version="1.0" encoding="UTF-8"?>\n' + serial.serializeToString(clone);
-    downloadBlob(new Blob([svgStr], { type: 'image/svg+xml' }), 'lock-animation.svg');
-    setStatus('📄 SVG berhasil diekspor!', 'ok');
+    const raw = codeEditor.value.trim();
+    if (!raw.includes('<svg')) { setStatus('✕ Belum ada SVG', 'err'); return; }
+
+    // Tambahkan XML declaration
+    const full = '<?xml version="1.0" encoding="UTF-8"?>\n' + raw;
+    downloadBlob(new Blob([full], { type: 'image/svg+xml;charset=utf-8' }), 'lock-animated.svg');
+    setStatus('📄 SVG diekspor — animasi SMIL tetap jalan di browser!', 'ok');
   } catch(e) {
     setStatus('✕ Gagal export SVG: ' + e.message, 'err');
   }
 }
 
-// ═══════════════════════════════════════════════
-// EXPORT GIF
-// ═══════════════════════════════════════════════
+// ═══════════════════════════════════════════
+// EXPORT GIF (frame capture)
+// ═══════════════════════════════════════════
 async function exportGIF() {
   if (typeof GIF === 'undefined') {
-    setStatus('✕ Library GIF belum dimuat. Refresh halaman.', 'err'); return;
+    setStatus('✕ Library GIF belum siap. Refresh halaman.', 'err'); return;
   }
   if (typeof html2canvas === 'undefined') {
-    setStatus('✕ html2canvas belum dimuat.', 'err'); return;
+    setStatus('✕ html2canvas belum siap.', 'err'); return;
   }
 
   setBusy(true);
-  const FRAMES      = 36;
-  const DURATION_MS = 2400;
-  const FRAME_DELAY = Math.round(DURATION_MS / FRAMES);
 
-  setStatus('🎞️ Mempersiapkan capture...', 'info');
-  setProgress(2);
+  // Tentukan durasi dari atribut dur SVG (default 3s)
+  const svgEl     = previewBox.querySelector('svg');
+  const durAttr   = svgEl?.querySelector('[dur]')?.getAttribute('dur') || '3s';
+  const durMs     = parseFloat(durAttr) * (durAttr.endsWith('ms') ? 1 : 1000);
+  const FRAMES    = 40;
+  const FRAME_GAP = Math.round(durMs / FRAMES);
 
   const gif = new GIF({
     workers: 2,
     quality: 8,
-    width: 320,
-    height: 320,
+    width: 300,
+    height: 300,
     workerScript: 'https://cdn.jsdelivr.net/npm/gif.js@0.2.0/dist/gif.worker.js',
     background: '#162032',
-    transparent: null,
     repeat: 0
   });
 
-  // Ambil semua frame
-  const frames = [];
+  setStatus('🎞️ Merekam frame...', 'info');
+
   for (let i = 0; i < FRAMES; i++) {
     try {
       const canvas = await html2canvas(previewBox, {
-        scale: 1,
+        scale: 1.2,
         backgroundColor: '#162032',
         logging: false,
         useCORS: true
       });
-      frames.push(canvas);
+      gif.addFrame(canvas, { delay: FRAME_GAP });
 
-      const pct = Math.round((i + 1) / FRAMES * 60);
+      const pct = Math.round((i + 1) / FRAMES * 65);
       setProgress(pct);
-      setStatus(`🎞️ Merekam frame ${i + 1} / ${FRAMES}...`, 'info');
-
-      await wait(FRAME_DELAY);
+      setStatus(`🎞️ Frame ${i + 1} / ${FRAMES}`, 'info');
+      await wait(FRAME_GAP);
     } catch(err) {
-      setStatus('✕ Gagal capture frame: ' + err.message, 'err');
+      setStatus('✕ Gagal capture: ' + err.message, 'err');
       setBusy(false); setProgress(0); return;
     }
   }
 
-  // Tambahkan frame ke GIF
-  frames.forEach(canvas => gif.addFrame(canvas, { delay: FRAME_DELAY }));
-
   setStatus('⚙️ Mengompres GIF...', 'info');
-  setProgress(70);
 
   await new Promise((resolve, reject) => {
-    const timeout = setTimeout(() => reject(new Error('Timeout (15 detik)')), 15000);
-
-    gif.on('progress', p => setProgress(70 + Math.round(p * 28)));
+    const t = setTimeout(() => reject(new Error('Timeout')), 20000);
+    gif.on('progress', p => setProgress(65 + Math.round(p * 33)));
     gif.on('finished', blob => {
-      clearTimeout(timeout);
+      clearTimeout(t);
       downloadBlob(blob, 'lock-animation.gif');
       setStatus('✓ GIF berhasil diekspor!', 'ok');
       setProgress(100);
@@ -517,59 +701,52 @@ async function exportGIF() {
       setBusy(false);
       resolve();
     });
-    gif.on('error', err => {
-      clearTimeout(timeout);
-      reject(err);
-    });
-
+    gif.on('error', err => { clearTimeout(t); reject(err); });
     gif.render();
   }).catch(err => {
-    setStatus('✕ Gagal buat GIF: ' + err.message, 'err');
+    setStatus('✕ Gagal GIF: ' + err.message, 'err');
     setProgress(0); setBusy(false);
   });
 }
 
-// ═══════════════════════════════════════════════
-// EXPORT MP4  (via canvas recording)
-// ═══════════════════════════════════════════════
+// ═══════════════════════════════════════════
+// EXPORT MP4 / WebM (MediaRecorder)
+// ═══════════════════════════════════════════
 async function exportMP4() {
-  // Cek MediaRecorder + canvas support
   if (!window.MediaRecorder) {
-    setStatus('✕ Browser tidak mendukung MediaRecorder.', 'err'); return;
+    setStatus('✕ Browser tidak support MediaRecorder.', 'err'); return;
   }
   if (typeof html2canvas === 'undefined') {
-    setStatus('✕ html2canvas belum dimuat.', 'err'); return;
+    setStatus('✕ html2canvas belum siap.', 'err'); return;
   }
 
   setBusy(true);
-  setStatus('🎬 Menyiapkan canvas recording...', 'info');
+  setStatus('🎬 Menyiapkan recording...', 'info');
   setProgress(5);
 
   try {
-    // Buat canvas offline berukuran tetap
-    const DURATION_MS = 2500; // 1 loop penuh
-    const FPS         = 30;
+    const svgEl   = previewBox.querySelector('svg');
+    const durAttr = svgEl?.querySelector('[dur]')?.getAttribute('dur') || '3s';
+    const durMs   = parseFloat(durAttr) * (durAttr.endsWith('ms') ? 1 : 1000);
+    const FPS     = 30;
     const W = 320, H = 320;
 
     const offscreen = document.createElement('canvas');
-    offscreen.width  = W;
-    offscreen.height = H;
+    offscreen.width  = W; offscreen.height = H;
     const ctx = offscreen.getContext('2d');
 
-    // Rekam dari canvas stream
-    const stream   = offscreen.captureStream(FPS);
-    const mimeType = ['video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm']
+    const mimeType = ['video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm']
                        .find(t => MediaRecorder.isTypeSupported(t)) || 'video/webm';
 
-    const recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 2_500_000 });
-    const chunks   = [];
+    const recorder = new MediaRecorder(offscreen.captureStream(FPS), {
+      mimeType, videoBitsPerSecond: 3_000_000
+    });
+    const chunks = [];
     recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
-
     recorder.start(50);
-    setProgress(10);
 
-    const totalFrames = Math.ceil((DURATION_MS / 1000) * FPS);
-    const frameGap    = Math.round(DURATION_MS / totalFrames);
+    const totalFrames = Math.ceil((durMs / 1000) * FPS);
+    const frameGap    = Math.round(durMs / totalFrames);
 
     for (let i = 0; i < totalFrames; i++) {
       const snap = await html2canvas(previewBox, {
@@ -580,50 +757,58 @@ async function exportMP4() {
       });
       ctx.drawImage(snap, 0, 0, W, H);
 
-      const pct = 10 + Math.round((i + 1) / totalFrames * 75);
+      const pct = 5 + Math.round((i + 1) / totalFrames * 80);
       setProgress(pct);
       setStatus(`🎬 Frame ${i + 1} / ${totalFrames}`, 'info');
       await wait(frameGap);
     }
 
     recorder.stop();
-    setStatus('⚙️ Memfinalisasi video...', 'info');
+    setStatus('⚙️ Finalizing...', 'info');
     setProgress(90);
 
     await new Promise((res, rej) => {
       recorder.onstop = () => {
-        const blob = new Blob(chunks, { type: mimeType });
         const ext  = mimeType.includes('mp4') ? 'mp4' : 'webm';
-        downloadBlob(blob, `lock-animation.${ext}`);
-        setStatus(`✓ Video (${ext.toUpperCase()}) berhasil diekspor!`, 'ok');
+        downloadBlob(new Blob(chunks, { type: mimeType }), `lock-animation.${ext}`);
+        setStatus(`✓ ${ext.toUpperCase()} berhasil diekspor!`, 'ok');
         setProgress(100);
         setTimeout(() => setProgress(0), 1200);
         setBusy(false);
         res();
       };
       recorder.onerror = e => rej(e.error || new Error('Recorder error'));
-      setTimeout(() => rej(new Error('Timeout finalisasi')), 8000);
+      setTimeout(() => rej(new Error('Timeout finalisasi')), 10000);
     });
 
   } catch(err) {
-    setStatus('✕ Gagal buat video: ' + err.message, 'err');
+    setStatus('✕ Gagal video: ' + err.message, 'err');
     setProgress(0); setBusy(false);
   }
 }
 
-// ═══════════════════════════════════════════════
-// EVENT LISTENERS
-// ═══════════════════════════════════════════════
-applyBtn.addEventListener('click', applyCSS);
-
-// Ctrl+Enter atau Cmd+Enter untuk apply langsung dari textarea
-cssEditor.addEventListener('keydown', e => {
-  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); applyCSS(); }
-});
-
+// ═══════════════════════════════════════════
+// EVENTS
+// ═══════════════════════════════════════════
+applyBtn.addEventListener('click', applyCode);
 exportSvgBtn.addEventListener('click', exportSVG);
 exportGifBtn.addEventListener('click', exportGIF);
 exportMp4Btn.addEventListener('click', exportMP4);
+
+codeEditor.addEventListener('keydown', e => {
+  // Ctrl+Enter → Apply
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+    e.preventDefault(); applyCode();
+  }
+  // Tab key → insert 2 spaces
+  if (e.key === 'Tab') {
+    e.preventDefault();
+    const s = codeEditor.selectionStart;
+    const v = codeEditor.value;
+    codeEditor.value = v.slice(0, s) + '  ' + v.slice(codeEditor.selectionEnd);
+    codeEditor.selectionStart = codeEditor.selectionEnd = s + 2;
+  }
+});
 </script>
 </body>
 </html>
