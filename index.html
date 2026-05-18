@@ -4,191 +4,158 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>CSS to SVG Animation</title>
+<title>SVG Animation Studio</title>
 
-<style>
-    body{
-        margin:0;
-        background:#ececec;
-        font-family:Arial, sans-serif;
-        display:flex;
-        height:100vh;
-    }
-
-    .editor{
-        width:40%;
-        padding:20px;
-        background:white;
-        box-shadow:0 0 10px rgba(0,0,0,0.1);
-        display:flex;
-        flex-direction:column;
-    }
-
-    textarea{
-        flex:1;
-        width:100%;
-        resize:none;
-        border:none;
-        outline:none;
-        font-size:14px;
-        font-family:monospace;
-        background:#111;
-        color:#00ff99;
-        padding:15px;
-        border-radius:10px;
-    }
-
-    button{
-        margin-top:15px;
-        padding:12px;
-        border:none;
-        border-radius:8px;
-        background:#f7c600;
-        font-weight:bold;
-        cursor:pointer;
-    }
-
-    .preview{
-        flex:1;
-        display:flex;
-        justify-content:center;
-        align-items:center;
-    }
-
-    svg{
-        width:320px;
-    }
-</style>
+<link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<div class="editor">
+<div class="container">
 
-<h2>CSS Animation Editor</h2>
+    <!-- LEFT PANEL -->
+    <div class="editor-panel">
 
-<textarea id="cssInput">
+        <h2>CSS Animation Editor</h2>
+
+        <textarea id="cssEditor">
 .shackle{
-    transform-origin: 120px 120px;
-    animation: unlock 3s infinite ease-in-out;
+    transform-origin:120px 120px;
+    animation:unlock 2s infinite ease-in-out;
 }
 
 @keyframes unlock{
 
     0%{
-        transform: rotate(0deg);
-    }
-
-    25%{
-        transform: rotate(-20deg) translate(-10px,-10px);
+        transform:rotate(0deg);
     }
 
     50%{
-        transform: rotate(-20deg) translate(-10px,-10px);
-    }
-
-    75%{
-        transform: rotate(0deg);
+        transform:
+            rotate(-20deg)
+            translate(-10px,-10px);
     }
 
     100%{
-        transform: rotate(0deg);
+        transform:rotate(0deg);
     }
 }
-</textarea>
+        </textarea>
 
-<button onclick="applyCSS()">
-Apply Animation
-</button>
+        <div class="buttons">
+
+            <button onclick="applyCSS()">
+                Apply
+            </button>
+
+            <select id="exportType">
+
+                <option value="svg">
+                    Export SVG
+                </option>
+
+                <option value="html">
+                    Export HTML
+                </option>
+
+                <option value="gif">
+                    Export GIF
+                </option>
+
+            </select>
+
+            <button onclick="downloadFile()">
+                Save
+            </button>
+
+        </div>
+
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div class="preview-panel">
+
+        <div id="preview">
+
+            <svg id="svgCanvas" viewBox="0 0 300 320">
+
+                <style id="dynamicStyle"></style>
+
+                <!-- SHACKLE -->
+                <g class="shackle">
+
+                    <path d="
+                        M95 130
+                        L95 85
+                        A55 55 0 0 1 205 85
+                        L205 130
+                    "
+                    fill="none"
+                    stroke="#777"
+                    stroke-width="22"
+                    stroke-linecap="round"/>
+
+                </g>
+
+                <!-- BODY -->
+                <rect
+                    x="55"
+                    y="120"
+                    rx="14"
+                    ry="14"
+                    width="190"
+                    height="150"
+                    fill="#F7C600"
+                />
+
+                <!-- HIGHLIGHT -->
+                <path
+                    d="
+                    M65 130
+                    Q90 120 110 130
+                    Q80 170 65 190
+                    Z"
+                    fill="#FFD93D"
+                    opacity="0.7"
+                />
+
+                <!-- SHADOW -->
+                <path
+                    d="
+                    M55 250
+                    Q150 235 245 170
+                    L245 270
+                    L55 270
+                    Z"
+                    fill="#F2B316"
+                />
+
+                <!-- KEYHOLE -->
+                <circle
+                    cx="150"
+                    cy="175"
+                    r="18"
+                    fill="#555"
+                />
+
+                <path
+                    d="
+                    M150 190
+                    L138 235
+                    L162 235
+                    Z"
+                    fill="#444"
+                />
+
+            </svg>
+
+        </div>
+
+    </div>
 
 </div>
 
-<div class="preview">
-
-<svg viewBox="0 0 300 320">
-
-    <!-- Dynamic Style -->
-    <style id="dynamicStyle"></style>
-
-    <!-- Shackle -->
-    <g class="shackle">
-        <path d="
-            M95 130
-            L95 85
-            A55 55 0 0 1 205 85
-            L205 130
-        "
-        fill="none"
-        stroke="#777"
-        stroke-width="22"
-        stroke-linecap="round"/>
-    </g>
-
-    <!-- Lock Body -->
-    <rect
-        x="55"
-        y="120"
-        rx="14"
-        ry="14"
-        width="190"
-        height="150"
-        fill="#F7C600"
-    />
-
-    <!-- Highlight -->
-    <path
-        d="
-        M65 130
-        Q90 120 110 130
-        Q80 170 65 190
-        Z"
-        fill="#FFD93D"
-        opacity="0.7"
-    />
-
-    <!-- Bottom Shade -->
-    <path
-        d="
-        M55 250
-        Q150 235 245 170
-        L245 270
-        L55 270
-        Z"
-        fill="#F2B316"
-    />
-
-    <!-- Keyhole -->
-    <circle
-        cx="150"
-        cy="175"
-        r="18"
-        fill="#555"
-    />
-
-    <path
-        d="
-        M150 190
-        L138 235
-        L162 235
-        Z"
-        fill="#444"
-    />
-
-</svg>
-
-</div>
-
-<script>
-function applyCSS(){
-
-    const css = document.getElementById("cssInput").value;
-
-    document.getElementById("dynamicStyle").innerHTML = css;
-}
-
-/* Apply default animation */
-applyCSS();
-</script>
+<script src="script.js"></script>
 
 </body>
 </html>
