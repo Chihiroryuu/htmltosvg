@@ -3,44 +3,45 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SVG Animation Studio | CSS + Ekspor</title>
+  <title>SVG Lock Animator | Edit CSS & Export</title>
   <link rel="stylesheet" href="style.css">
-  <!-- Library untuk GIF -->
+  <!-- Library untuk export -->
   <script src="https://cdn.jsdelivr.net/npm/gif.js.optimized/dist/gif.js"></script>
-  <!-- HTML2CANVAS -->
   <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-  <!-- FFMPEG (WebAssembly) -->
   <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.6/dist/ffmpeg.min.js"></script>
 </head>
 <body>
-<div class="container">
-  <!-- Panel kiri: editor CSS -->
-  <div class="left-panel">
-    <h2>🎨 CSS Animation</h2>
+<div class="app">
+  <!-- LEFT: Editor CSS -->
+  <div class="editor-panel">
+    <h2>🔐 Edit CSS Animation</h2>
     <textarea id="cssEditor" spellcheck="false"></textarea>
     <div class="toolbar">
-      <button id="applyBtn">▶ Apply CSS</button>
+      <button id="applyBtn">✨ Apply CSS</button>
       <button id="exportSvgBtn">📄 SVG</button>
       <button id="exportGifBtn">🎞️ GIF</button>
       <button id="exportMp4Btn">🎬 MP4</button>
     </div>
-    <div id="status">✅ Siap | Edit CSS dan klik Apply</div>
+    <div id="status">✅ Siap | Klik Apply untuk menjalankan animasi</div>
   </div>
 
-  <!-- Panel kanan: preview animasi -->
-  <div class="right-panel">
-    <div id="preview">
+  <!-- RIGHT: Preview SVG -->
+  <div class="preview-panel">
+    <div id="previewBox">
       <svg id="svgCanvas" viewBox="0 0 300 320">
         <style id="dynamicStyle"></style>
-        <!-- Shackle (gembok bagian atas) -->
+        <!-- Shackle (bagian atas) -->
         <g class="shackle">
           <path d="M95 130 L95 85 A55 55 0 0 1 205 85 L205 130" 
                 fill="none" stroke="#777" stroke-width="22" stroke-linecap="round"/>
         </g>
-        <!-- Badan gembok -->
-        <rect x="55" y="120" width="190" height="150" rx="14" fill="#F7C600" />
+        <!-- Body gembok -->
+        <rect x="55" y="120" rx="14" ry="14" width="190" height="150" fill="#F7C600" />
+        <path d="M65 130 Q90 120 110 130 Q80 170 65 190 Z" fill="#FFD93D" opacity="0.7" />
+        <path d="M55 250 Q150 235 245 170 L245 270 L55 270 Z" fill="#F2B316" />
         <!-- Lubang kunci -->
-        <circle cx="150" cy="180" r="18" fill="#555" />
+        <circle cx="150" cy="175" r="18" fill="#555" />
+        <path d="M150 190 L138 235 L162 235 Z" fill="#444" />
       </svg>
     </div>
   </div>
